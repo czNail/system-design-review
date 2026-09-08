@@ -1,7 +1,7 @@
 # Module Review Route
 
 Use this reference when the current module is unclear or the discussion is stuck.
-Do not dump these questions on the user. Select the single question that unlocks the next dependency.
+Do not dump these questions on the user. Ask at most one that resolves a material uncertainty; proceed without a question when evidence or existing authorization suffices.
 
 ## 1. Meaning
 
@@ -28,7 +28,7 @@ A useful question: if two components disagree, which one wins and why?
 
 Keep the list small. Prefer rules that constrain design, e.g.:
 - at most one active writer for a term;
-- visible position never exceeds durable position;
+- when visibility promises durability, visible position never exceeds durable position;
 - published immutable data never changes;
 - metadata never claims durability stronger than underlying data.
 

@@ -2,6 +2,10 @@
 
 Read this before making correctness claims about persistent or distributed state.
 
+## Establish the contract
+
+Define visibility (to whom), commitment, durability (against which failures), and what a successful response promises. Treat these as distinct properties; establish their required relationships from the system's contract. If the contract is unclear, state the assumption and keep conclusions conditional.
+
 ## Transition reasoning order
 
 For one state transition, identify:
@@ -19,9 +23,10 @@ Do not describe only the happy-path recovery procedure. Verify the invariant at 
 
 ## Common invariants
 
-Useful patterns include:
+Select only patterns required by the established contract:
 - persisted metadata must not claim a state stronger than durable data;
-- consumer-visible state must not exceed the system's durable/committed state;
+- if visibility promises committed state, consumer-visible state must not exceed the committed boundary;
+- if visibility or a successful response promises durability, the exposed or acknowledged state must satisfy that durability boundary;
 - stale authority cannot continue mutating state after a newer authority is established;
 - retries are idempotent or conflicts are detected explicitly;
 - recovery establishes one unambiguous history before normal mutation resumes.
@@ -39,3 +44,4 @@ For each critical operation, consider only material cut points:
 | after response / before next operation | | | | |
 
 Only expand the matrix when the current design decision depends on it.
+Adapt the cut points to the actual operation ordering and include commitment and response guarantees where relevant; the rows are prompts, not a prescribed persistence protocol.

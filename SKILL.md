@@ -2,11 +2,11 @@
 name: database-system-design-review
 description: >-
   Interactive architecture/design review for database and systems modules. Use when the user wants
-  to reason through a real design step by step, review module boundaries or APIs, or says things like
-  "一个模块一个模块讨论", "带我一步步设计", "review this architecture", or "帮我判断这个模块怎么划".
-  Prefer this over a one-shot architecture essay when shared decisions and trade-offs matter. Do not
-  use for ordinary bug fixing, implementation, or line-by-line code review unless the user is using
-  them to resolve an architecture decision.
+  to reason through a real design interactively, discuss module boundaries or APIs step by step,
+  or says things like "一个模块一个模块讨论", "带我一步步设计", or "walk through this architecture with me".
+  Use when the user wants a design dialogue to resolve decisions and trade-offs. Do not use for
+  one-shot architecture reports, ordinary bug fixing, implementation, or line-by-line code review
+  unless the user asks to work through architecture decisions interactively.
 ---
 
 # Database / System Design Review
@@ -21,6 +21,7 @@ This is a **design dialogue**, not a one-shot design report.
 - Give your own recommended answer; do not merely interview the user.
 - Keep each turn compact enough to discuss.
 - Do not move on until the current decision is **agreed, consciously deferred, or shown to be unnecessary**.
+- Existing agreement or authorization to use your judgment is sufficient to proceed; do not request repeated confirmation. If the user redirects the discussion, follow their chosen topic and retain any unresolved decision as open.
 - Do not dump the full checklist or review several modules at once unless the user explicitly asks for a synthesis.
 - Challenge weak boundaries and assumptions directly, but explain why.
 
@@ -48,7 +49,7 @@ Find the component that owns the core state/invariants. A useful test is:
 
 > If this state becomes wrong, which component is responsible for making the system correct again?
 
-Start there. Only move outward after its responsibility and ownership are clear.
+Use this as the default starting point when the user has not chosen one. When the user specifies a module or discussion order, follow it and inspect only the dependencies needed to assess that decision. In the default traversal, clarify core responsibility and ownership before moving outward.
 
 For the underlying design philosophy, read `references/design-principles.md` when you need to evaluate a boundary or compare alternatives.
 
@@ -58,9 +59,9 @@ For the current module/decision, repeat this loop:
 
 1. **Establish** — state the observed design in 1–3 sentences, grounded in code/docs when available.
 2. **Recommend** — give the design you currently prefer and the main reason.
-3. **Decide** — ask exactly **one high-value question** needed to accept, reject, or refine that recommendation.
-4. **Record mentally** — treat the answer as `AGREED`, `DEFERRED`, or `OPEN`; do not reopen an agreed decision without new evidence.
-5. **Continue** — stay on the same branch if unresolved; otherwise choose the next dependency/module.
+3. **Decide** — ask at most **one high-value question**, only when unresolved information or a user choice materially affects the decision. When evidence, prior agreement, or delegated judgment suffices, state the conclusion and continue without asking for confirmation. Do not label your own recommendation as user agreement.
+4. **Record** — maintain a compact, visible decision record at branch checkpoints: conclusion, rationale, status (`AGREED`, `DEFERRED`, or `OPEN`), and any unresolved conditions. Identify decisions made under delegated judgment. Do not repeat the record every turn or write a file unless requested; do not reopen an agreed decision without new evidence.
+5. **Continue** — stay on the same branch if unresolved unless the user redirects; otherwise choose the next dependency/module.
 
 A normal turn should usually look like:
 
@@ -70,6 +71,7 @@ A normal turn should usually look like:
 > **One thing to decide:** ...
 
 Do not mechanically print these labels if natural prose is clearer.
+Omit the question when no material input is needed.
 
 ## What to resolve for a module
 
@@ -132,11 +134,11 @@ Stay in the design lane the user is discussing.
 
 At the end of a branch, keep the checkpoint short:
 
-- **AGREED** — clear decision and rationale.
+- **AGREED** — clear decision and rationale; note whether accepted by the user or decided under delegated judgment.
 - **DEFERRED** — explicitly out of scope or intentionally postponed; name the remaining risk.
-- **OPEN** — material uncertainty remains; stay here.
+- **OPEN** — material uncertainty remains; stay here unless the user chooses another topic, in which case retain the unresolved conditions for later.
 
-When a branch is resolved, select the next module based on dependency, normally moving from semantic core toward adapters, protocols, storage mechanics, and process/runtime plumbing.
+When a branch is resolved, follow the user's chosen order. Otherwise select the next module based on dependency, normally moving from semantic core toward adapters, protocols, storage mechanics, and process/runtime plumbing.
 
 ## Synthesis
 

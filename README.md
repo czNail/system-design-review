@@ -2,7 +2,7 @@
 
 An interactive skill for reviewing database and systems architecture **one design decision at a time**.
 
-Instead of producing a long one-shot architecture review, this skill works through the design from the semantic core outward. It inspects real code and documents first, gives a concrete recommendation, and then resolves one high-value decision before moving to the next module.
+This skill supports interactive design discussions, with a default traversal from the semantic core outward. It follows a user-specified starting point or discussion order, inspects real code and documents first, and gives a concrete recommendation before moving to the next module. One-shot architecture reports are outside its default trigger.
 
 ## What it focuses on
 
@@ -23,20 +23,21 @@ A normal design discussion looks like this:
 ```text
 inspect real implementation
         ↓
-find the semantic center / authority
+follow the user's starting point, or find the semantic center / authority
         ↓
 state the current design
         ↓
 give a recommendation
         ↓
-resolve one key decision
+resolve one key decision; ask at most one material question if needed
         ↓
-AGREED / DEFERRED / OPEN
+record conclusion, rationale, status, and unresolved conditions
         ↓
 move to the next dependent module
 ```
 
 The skill deliberately avoids dumping the entire checklist at once. The unit of progress is a **design decision**, not a document section.
+Evidence, prior agreement, or delegated judgment can suffice to proceed without another confirmation. Branch checkpoints preserve decisions visibly without repeating them every turn or creating files by default. User redirection takes priority; unresolved decisions remain recorded as open.
 
 ## Repository structure
 
@@ -67,7 +68,8 @@ The skill deliberately avoids dumping the entire checklist at once. The unit of 
 A few rules are intentionally strong:
 
 - Inspect code/docs before asking the user questions that the implementation can answer.
-- Start from the component that owns the core state and invariants, not necessarily from `main` or the current directory structure.
+- Follow the user's chosen discussion order; otherwise start from the component that owns the core state and invariants.
+- Define visibility, commitment, durability, and response guarantees before selecting failure invariants.
 - Split modules by independently changing **knowledge and ownership**, not by file size, function count, or execution phase.
 - Prefer complete semantic operations over caller-managed sequences such as `validate → mutate → state`.
 - Do not call something a bottleneck without evidence; distinguish architectural cost from measured performance problems.
