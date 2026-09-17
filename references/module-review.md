@@ -1,91 +1,96 @@
-# Module Review Route
+# 模块评审路径
 
-Use this reference when the current module is unclear or the discussion is stuck.
-Do not dump these questions on the user. Ask at most one that resolves a material uncertainty; proceed without a question when evidence or existing authorization suffices.
+当当前模块不清晰或讨论陷入停滞时，使用本参考资料。不要把这些问题一次性全部抛给用户。最多提出一个能解决实质性不确定性的问题；有证据或既有授权足够时，直接推进。
 
-## 1. Meaning
+## 1. 含义
 
-Resolve first:
-- What is this thing in one sentence?
-- Why must it exist as a distinct concept?
-- What guarantee does it provide?
-- What nearby concern should explicitly not belong here?
+先解决：
 
-If naming it cleanly is difficult, test whether the abstraction mixes semantic entity, physical mechanism, service/process, and protocol adapter.
+- 用一句话说明这是什么；
+- 为什么必须作为独立概念存在；
+- 提供什么保证；
+- 哪个相邻关注点明确不应属于这里。
 
-## 2. Ownership
+如果很难清楚地命名它，检查这个抽象是否混合了语义实体、物理机制、服务 / 进程和协议适配器。
 
-Identify:
-- authoritative state;
-- mutable state;
-- derived/cache state;
-- ownership of decisions, not just data;
-- who can change each state and under what authority.
+## 2. 所有权
 
-A useful question: if two components disagree, which one wins and why?
+识别：
 
-## 3. Invariants
+- 权威状态；
+- 可变状态；
+- 派生 / 缓存状态；
+- 决策的所有者，而不只是数据的所有者；
+- 谁能在什么权威下改变每项状态。
 
-Keep the list small. Prefer rules that constrain design, e.g.:
-- at most one active writer for a term;
-- when visibility promises durability, visible position never exceeds durable position;
-- published immutable data never changes;
-- metadata never claims durability stronger than underlying data.
+一个有用的问题是：如果两个组件意见不一致，谁胜出，为什么？
 
-If an invariant can only be stated by naming several internal modules, inspect whether ownership is fragmented.
+## 3. 不变量
+
+保持列表简短。优先选择约束设计的规则，例如：
+
+- 一个任期内最多有一个活跃写入方；
+- 当可见性承诺持久性时，可见位置永远不能超过持久位置；
+- 已发布的不可变数据永远不能改变；
+- 元数据声称的持久性不能强于底层数据实际具备的持久性。
+
+如果只能通过列举多个内部模块才能描述一条不变量，检查所有权是否已经碎片化。
 
 ## 4. API
 
-For each public operation, ask:
-- Is it a complete domain action?
-- Can invalid call ordering be expressed at all?
-- Does the caller need to call `validate`, `flush`, `state`, or another helper to complete one logical action?
-- Does it expose storage representation or protocol details?
-- Should it return a semantic result/snapshot instead?
+针对每个公共操作，询问：
 
-Prefer APIs that make illegal states or sequences difficult to express.
+- 它是否是完整的领域动作？
+- 是否能表达非法的调用顺序？
+- 调用方是否必须调用 `validate`、`flush`、`state` 或其他辅助操作，才能完成一个逻辑动作？
+- 是否暴露了存储表示或协议细节？
+- 是否应该改为返回语义结果 / 快照？
 
-## 5. Data path
+优先选择让非法状态或非法顺序难以表达的 API。
 
-Trace one representative operation end to end:
-- allocations/copies;
-- encode/decode;
-- IPC/network hops;
-- locks/queues;
-- sync/async boundaries;
-- file/object writes;
-- cache/materialization.
+## 5. 数据路径
 
-Do not draw the whole system unless it affects the current boundary.
+端到端跟踪一个代表性操作：
 
-## 6. Cost
+- 分配 / 复制；
+- 编码 / 解码；
+- IPC / 网络跳转；
+- 锁 / 队列；
+- 同步 / 异步边界；
+- 文件 / 对象写入；
+- 缓存 / 物化。
 
-Classify costs:
-- required by correctness;
-- artifact of current implementation;
-- common path;
-- rare/recovery path;
-- scales with throughput, data size, number of tenants/shards, or concurrency.
+除非它影响当前边界，否则不要绘制整个系统。
 
-Do not call something a bottleneck without evidence. It is valid to call it an architectural cost before measurement.
+## 6. 成本
 
-## 7. Failure
+分类成本：
 
-Use `failure-reasoning.md` for persistent/distributed state.
-Otherwise ask only what can invalidate the current boundary:
-- partial mutation;
-- retry/duplicate request;
-- stale authority;
-- restart;
-- reordered visibility.
+- 正确性要求的成本；
+- 当前实现造成的成本；
+- 常见路径成本；
+- 少见路径 / 恢复路径成本；
+- 随吞吐量、数据大小、租户 / 分片数量或并发度增长的成本。
 
-## 8. Alternative
+没有证据时，不要称某项成本为瓶颈。称其为架构成本是合理的。
 
-Generate an alternative only when there is a real decision.
-An alternative should move a boundary, ownership rule, or interface—not just rename classes.
+## 7. 失败处理
 
-State the trade-off in concrete terms:
-- which caller knows less/more;
-- which invariant gets one owner/multiple owners;
-- what cost moves to the hot path;
-- which future change gets localized or amplified.
+处理持久化 / 分布式状态时，使用 `failure-reasoning.md`。否则只询问可能使当前边界失效的问题：
+
+- 部分变更；
+- 重试 / 重复请求；
+- 过期权威；
+- 重启；
+- 可见性顺序被打乱。
+
+## 8. 替代方案
+
+只有存在真实决策时才生成替代方案。替代方案应改变边界、所有权规则或接口，而不只是重命名类。
+
+用具体语言说明权衡：
+
+- 哪个调用方需要了解更多 / 更少；
+- 哪条不变量由一个所有者 / 多个所有者负责；
+- 哪项成本被移动到热点路径；
+- 哪种未来变更会被局部化或放大。

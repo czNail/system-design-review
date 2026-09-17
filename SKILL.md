@@ -1,117 +1,117 @@
 ---
-name: database-system-design-review
+name: system-design-review
 description: >-
-  Interactive architecture/design review for database and systems modules. Use when the user wants
-  to reason through a real design interactively, discuss module boundaries or APIs step by step,
-  or says things like "一个模块一个模块讨论", "带我一步步设计", or "walk through this architecture with me".
-  Use when the user wants a design dialogue to resolve decisions and trade-offs. Do not use for
-  one-shot architecture reports, ordinary bug fixing, implementation, or line-by-line code review
-  unless the user asks to work through architecture decisions interactively.
+  面向数据库和系统模块的交互式架构与设计评审。当用户希望通过对话逐步推演真实设计、讨论模块边界或 API，
+  或提出“一个模块一个模块讨论”“带我一步步设计”或“walk through this architecture with me”等请求时使用。
+  适用于通过设计对话解决决策和权衡。不要用于一次性架构报告、普通故障修复、实现工作，或逐行代码评审，
+  除非用户明确要求以交互方式讨论架构决策。
 ---
 
-# Database / System Design Review
+# 数据库 / 系统设计评审
 
-Help the user reach a shared, evidence-backed design one decision at a time.
+帮助用户一次解决一个决策，逐步形成双方认可且有证据支持的设计。
 
-## Core contract
+## 核心约定
 
-This is a **design dialogue**, not a one-shot design report.
+这是一次**设计对话**，不是一次性设计报告。
 
-- Work on **one module or one design decision at a time**.
-- Give your own recommended answer; do not merely interview the user.
-- Keep each turn compact enough to discuss.
-- Do not move on until the current decision is **agreed, consciously deferred, or shown to be unnecessary**.
-- Existing agreement or authorization to use your judgment is sufficient to proceed; do not request repeated confirmation. If the user redirects the discussion, follow their chosen topic and retain any unresolved decision as open.
-- Do not dump the full checklist or review several modules at once unless the user explicitly asks for a synthesis.
-- Challenge weak boundaries and assumptions directly, but explain why.
+- 一次只处理**一个模块或一个设计决策**。
+- 给出你自己的推荐方案，不要只做用户访谈。
+- 每轮内容保持简短，足以继续讨论。
+- 当前决策必须**达成一致、有意识地延期，或确认无需处理**后，才能继续推进。
+- 既有共识或用户已授权你自行判断，就足以继续；不要反复请求确认。用户转移讨论主题时，跟随其选择，并保留未解决的决策。
+- 除非用户明确要求综合，否则不要一次性倾倒完整清单或同时评审多个模块。
+- 直接指出薄弱的边界和假设，并解释原因。
 
-The default unit of progress is a **decision**, not a section of a document.
+默认的推进单位是一个**决策**，而不是文档中的一个章节。
 
-## Do your homework first
+## 先做准备工作
 
-If code, design docs, diagrams, prior decisions, or repository access exist, inspect them before asking questions they can answer.
+如果存在代码、设计文档、图表、既有决策或仓库访问权限，先检查它们，再询问这些材料已经能够回答的问题。
 
-Use evidence to establish:
-- current module/process boundaries;
-- authoritative state and ownership;
-- public APIs and callers;
-- main data path;
-- persistence and concurrency boundaries.
+用证据确认：
 
-Do not ask the user to explain facts the implementation already reveals.
-If implementation and the user's mental model disagree, surface the mismatch explicitly.
+- 当前模块 / 进程边界；
+- 权威状态及其所有权；
+- 公共 API 及调用方；
+- 主要数据路径；
+- 持久化边界和并发边界。
 
-## Start at the semantic center
+不要要求用户解释实现已经揭示的事实。
+如果实现与用户的心智模型不一致，明确指出这种不匹配。
 
-Do not automatically start from `main`, networking, file layout, or the user's proposed module split.
+## 从语义中心开始
 
-Find the component that owns the core state/invariants. A useful test is:
+不要自动从 `main`、网络、文件布局或用户提出的模块拆分开始。
 
-> If this state becomes wrong, which component is responsible for making the system correct again?
+先找出拥有核心状态和不变量的组件。可以用下面的问题判断：
 
-Use this as the default starting point when the user has not chosen one. When the user specifies a module or discussion order, follow it and inspect only the dependencies needed to assess that decision. In the default traversal, clarify core responsibility and ownership before moving outward.
+> 如果这项状态出错，哪个组件负责让系统重新正确？
 
-For the underlying design philosophy, read `references/design-principles.md` when you need to evaluate a boundary or compare alternatives.
+当用户没有指定起点时，以此作为默认起点。用户指定模块或讨论顺序时，遵循用户安排，并且只检查评估该决策所需的依赖。在默认遍历中，先澄清核心职责和所有权，再向外扩展。
 
-## Conversation loop
+需要评估边界或比较方案时，阅读 `references/design-principles.md`，了解底层设计原则。
 
-For the current module/decision, repeat this loop:
+## 对话循环
 
-1. **Establish** — state the observed design in 1–3 sentences, grounded in code/docs when available.
-2. **Recommend** — give the design you currently prefer and the main reason.
-3. **Decide** — ask at most **one high-value question**, only when unresolved information or a user choice materially affects the decision. When evidence, prior agreement, or delegated judgment suffices, state the conclusion and continue without asking for confirmation. Do not label your own recommendation as user agreement.
-4. **Record** — maintain a compact, visible decision record at branch checkpoints: conclusion, rationale, status (`AGREED`, `DEFERRED`, or `OPEN`), and any unresolved conditions. Identify decisions made under delegated judgment. Do not repeat the record every turn or write a file unless requested; do not reopen an agreed decision without new evidence.
-5. **Continue** — stay on the same branch if unresolved unless the user redirects; otherwise choose the next dependency/module.
+针对当前模块 / 决策，重复以下循环：
 
-A normal turn should usually look like:
+1. **建立现状** —— 用 1–3 句话说明观察到的设计；有代码或文档时，以它们为依据。
+2. **提出建议** —— 给出当前更倾向的设计及主要理由。
+3. **做出决策** —— 最多提出**一个高价值问题**，且只有在未解决的信息或用户选择会实质影响决策时才提问。有证据、既有共识或已委托的判断足够时，直接说明结论并继续。不要把你自己的建议标记为用户共识。
+4. **记录决策** —— 在分支检查点维护简短、可见的决策记录：结论、理由、状态（`AGREED`、`DEFERRED` 或 `OPEN`）以及未解决的条件。标明哪些决策是在用户授权你自行判断的情况下作出的。不要每轮重复记录，也不要在用户未要求时写入文件；除非出现新证据，不要重新打开已达成一致的决策。
+5. **继续推进** —— 未解决时留在当前分支，除非用户转移主题；否则选择下一个依赖 / 模块。
 
-> **Current conclusion:** ...  
-> **Why:** ...  
-> **I recommend:** ...  
-> **One thing to decide:** ...
+正常一轮通常应接近下面的形式：
 
-Do not mechanically print these labels if natural prose is clearer.
-Omit the question when no material input is needed.
+> **当前结论：**……
+> **原因：**……
+> **我的建议：**……
+> **需要决定的一件事：**……
 
-## What to resolve for a module
+如果自然语言更清楚，不要机械打印这些标签。
+不需要用户提供实质信息时，省略问题。
 
-Do not ask all of these at once. Use them as a dependency order:
+## 模块需要解决的问题
 
-1. **Meaning** — What is this module, and what guarantee does it provide?
-2. **Ownership** — What state/design knowledge does it own? What must it not own?
-3. **Invariants** — Which few rules define correctness?
-4. **API** — What complete semantic operations should callers see?
-5. **Data path** — How does one representative operation move through the system?
-6. **Cost** — What is inherently expensive or serialized on the common path?
-7. **Failure** — What must still hold after partial failure, retry, restart, or concurrent authority changes?
-8. **Alternative** — Is there a meaningfully different boundary/API worth comparing?
+不要一次性询问所有问题。按依赖顺序使用它们：
 
-Skip steps that do not affect the current decision.
-For a detailed module interrogation route, read `references/module-review.md`.
-For durable/distributed state, read `references/failure-reasoning.md` before claiming correctness.
+1. **含义** —— 这个模块是什么？提供什么保证？
+2. **所有权** —— 它拥有哪些状态 / 设计知识？不应拥有哪些？
+3. **不变量** —— 哪几条规则定义了正确性？
+4. **API** —— 调用方应该看到哪些完整的语义操作？
+5. **数据路径** —— 一个代表性操作如何流经系统？
+6. **成本** —— 常见路径上哪些成本必然昂贵或会被串行化？
+7. **失败处理** —— 部分失败、重试、重启或并发的权威变更之后，哪些性质仍必须成立？
+8. **替代方案** —— 是否存在值得比较的、边界 / API 有实质差异的方案？
 
-## Boundary rule
+跳过不影响当前决策的步骤。
+需要详细的模块审查路径时，阅读 `references/module-review.md`。
+处理持久化 / 分布式状态并声称设计正确之前，阅读 `references/failure-reasoning.md`。
 
-Split modules by **independently changing knowledge and ownership**, not by:
-- file size;
-- function count;
-- execution phase (`PrepareManager`, `RecoveryManager`, `FlushManager`);
-- a desire for more layers.
+## 边界规则
 
-Keep related operations together when they share the same authority, state, and invariants.
-Split when two parts can change independently without needing to understand each other's rules.
+按**可独立变化的知识和所有权**拆分模块，而不是按以下因素拆分：
 
-## API rule
+- 文件大小；
+- 函数数量；
+- 执行阶段（`PrepareManager`、`RecoveryManager`、`FlushManager`）；
+- 为了增加层次而增加层次。
 
-Prefer complete semantic operations that hide validation, ordering, locking, and derived state.
+如果相关操作共享同一个权威、状态和不变量，就保持在一起。
+如果两个部分可以在无需理解对方规则的情况下独立变化，就拆分它们。
 
-Prefer:
+## API 规则
+
+优先选择隐藏校验、排序、加锁和派生状态的完整语义操作。
+
+优先选择：
 
 ```text
 append_wal(token, start_lsn, data) -> AppendResult
 ```
 
-over caller-managed sequences such as:
+而不是由调用方自行管理的序列：
 
 ```text
 validate_writer(token)
@@ -119,45 +119,46 @@ append(start_lsn, data)
 state()
 ```
 
-If callers must remember a hidden sequence to stay correct, complexity has leaked upward.
+如果调用方必须记住一个隐藏的调用顺序才能保持正确，说明复杂度已经泄漏到上层。
 
-## Scope discipline
+## 范围约束
 
-Stay in the design lane the user is discussing.
+留在用户正在讨论的设计范围内。
 
-- If the question can be resolved from code, inspect code instead of asking.
-- If a performance concern appears, distinguish an architectural cost from an unmeasured bottleneck.
-- If a correctness claim depends on protocol semantics that are not established, state the assumption instead of declaring a bug.
-- If implementation work becomes the next step, finish the design decision first; only implement if the user asks.
+- 问题可以从代码中解决时，检查代码而不是提问。
+- 出现性能担忧时，区分架构成本和未经测量的瓶颈。
+- 正确性结论依赖尚未确立的协议语义时，陈述假设，不要直接宣布存在缺陷。
+- 如果下一步变成实现工作，先完成设计决策；只有用户要求时才实现。
 
-## Moving on
+## 继续下一个分支
 
-At the end of a branch, keep the checkpoint short:
+每个分支结束时，保持检查点简短：
 
-- **AGREED** — clear decision and rationale; note whether accepted by the user or decided under delegated judgment.
-- **DEFERRED** — explicitly out of scope or intentionally postponed; name the remaining risk.
-- **OPEN** — material uncertainty remains; stay here unless the user chooses another topic, in which case retain the unresolved conditions for later.
+- **AGREED** —— 明确的决策和理由；说明是用户接受的，还是在用户授权你自行判断下作出的。
+- **DEFERRED** —— 明确超出范围或有意延期；指出剩余风险。
+- **OPEN** —— 仍存在实质性不确定性；除非用户选择其他主题，否则停留在这里。若用户转移主题，保留未解决条件以便之后处理。
 
-When a branch is resolved, follow the user's chosen order. Otherwise select the next module based on dependency, normally moving from semantic core toward adapters, protocols, storage mechanics, and process/runtime plumbing.
+分支解决后，遵循用户选择的顺序。否则按依赖选择下一个模块，通常从语义核心向适配器、协议、存储机制以及进程 / 运行时基础设施推进。
 
-## Synthesis
+## 综合
 
-Only when the important branches are resolved, or the user asks to summarize, synthesize:
-- module map;
-- ownership/authority map;
-- public API decisions;
-- critical invariants;
-- main data path and hot path;
-- deferred risks;
-- agreed refactors or ADR decisions.
+只有在重要分支都已解决，或用户要求总结时，才综合以下内容：
 
-For reusable final formats, read `references/output-templates.md`.
+- 模块图；
+- 所有权 / 权威关系图；
+- 公共 API 决策；
+- 关键不变量；
+- 主要数据路径和热点路径；
+- 延期风险；
+- 已同意的重构或 ADR 决策。
 
-## Guardrails
+需要可复用的最终格式时，阅读 `references/output-templates.md`。
 
-- Do not accept the user's proposed architecture merely because it is already implemented.
-- Do not manufacture a problem to justify a refactor.
-- Do not equate more abstraction with better design.
-- Do not hide trade-offs behind words such as "cleaner", "decoupled", or "scalable"; say what knowledge, cost, or invariant actually moves.
-- Do not ask five questions in one turn.
-- Do not repeat resolved context unless new evidence changes the decision.
+## 防护规则
+
+- 不要仅因为用户提出的架构已经实现，就接受它。
+- 不要为了证明需要重构而人为制造问题。
+- 不要把更多抽象等同于更好的设计。
+- 不要用“更整洁”“解耦”“可扩展”等词掩盖权衡；说明具体移动了哪些知识、成本或不变量。
+- 不要一轮提出五个问题。
+- 除非新证据改变结论，否则不要重复已经解决的上下文。

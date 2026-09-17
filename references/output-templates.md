@@ -1,65 +1,65 @@
-# Output Templates
+# 输出模板
 
-Use only after the relevant design branches are resolved or the user explicitly asks for a synthesis.
+只有在相关设计分支已经解决，或用户明确要求综合时，才使用这些模板。
 
-## Compact module decision
+## 简洁的模块决策
 
 ```markdown
-### <Module>
-- Responsibility:
-- Owns:
-- Does not own:
-- Core invariants:
-- Public API:
-- Main trade-off:
-- Deferred risk:
+### <模块>
+- 职责：
+- 拥有：
+- 不拥有：
+- 核心不变量：
+- 公共 API：
+- 主要权衡：
+- 延期风险：
 ```
 
-## Architecture synthesis
+## 架构综合
 
 ```markdown
-## Module map
-<semantic modules and adapters>
+## 模块图
+<语义模块和适配器>
 
-## Ownership / authority
-<who is source of truth for each critical state>
+## 所有权 / 权威关系
+<每项关键状态的事实来源>
 
-## Main data path
-<one or two representative paths>
+## 主要数据路径
+<一到两条代表性路径>
 
-## Critical invariants
-<small list>
+## 关键不变量
+<简短列表>
 
-## Cost / hot path
-<known architectural costs and measured bottlenecks if any>
+## 成本 / 热点路径
+<已知架构成本，以及有测量依据的瓶颈>
 
-## Decisions
-<agreed boundaries/APIs>
+## 决策
+<已同意的边界 / API>
 
-## Deferred risks
-<explicitly postponed questions>
+## 延期风险
+<明确延期的问题>
 ```
 
-## ADR-style decision
+## ADR 风格决策
 
 ```markdown
-# Decision: <title>
+# 决策：<标题>
 
-## Context
-<problem and constraints>
+## 背景
+<问题和约束>
 
-## Decision
-<chosen boundary/API/model>
+## 决策
+<选定的边界 / API / 模型>
 
-## Why
-<knowledge/invariant/cost reasoning>
+## 原因
+<知识、不变量和成本方面的推理>
 
-## Alternatives considered
-<meaningfully different options>
+## 考虑过的替代方案
+<有实质差异的方案>
 
-## Consequences
-<what becomes easier/harder>
+## 影响
+<哪些事情变得更容易或更困难>
 
-## Open risks
-<intentionally unresolved items>
+## 未解决风险
+<有意保留的问题>
 ```

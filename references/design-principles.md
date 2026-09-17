@@ -1,104 +1,75 @@
-# Design Principles
+# 设计原则
 
-Use this reference when judging whether a module boundary or API is actually better.
+在判断模块边界或 API 是否确实更好时，使用本参考资料。
 
-## Five-lens system model
+## 五个视角的系统模型
 
-For every important component, reason through five models:
+针对每个重要组件，从五个模型进行推理：
 
-1. **Semantic model — What is it?**
-   - What capability/guarantee exists because this module exists?
-   - What is explicitly outside its responsibility?
+1. **语义模型——它是什么？**
+   - 这个模块存在后，系统获得了什么能力 / 保证？
+   - 哪些职责明确不属于它？
+2. **所有权模型——谁拥有什么？**
+   - 谁是权威？谁可以修改状态？
+   - 哪些只是缓存、副本、派生状态或观察结果？
+3. **数据流模型——数据如何移动？**
+   - 数据在哪里创建、复制、序列化、发送、持久化、重建和消费？
+4. **成本模型——代价是什么？**
+   - CPU、内存、锁、缓存一致性、系统调用、上下文切换、I/O、网络、复制、写放大和后台工作。
+   - 区分常见路径成本和少见路径成本。
+5. **失败模型——失败后仍然正确吗？**
+   - 崩溃、部分写入、重试、超时、网络分区、并发交错、重启和恢复。
 
-2. **Ownership model — Who owns what?**
-   - Who is the authority?
-   - Who may mutate the state?
-   - What is cache, replica, derived state, or observation only?
+简写：
 
-3. **Data-flow model — How does data move?**
-   - Where is data created, copied, serialized, sent, persisted, reconstructed, and consumed?
+> 它是什么？谁拥有什么？数据如何移动？代价是什么？失败后仍然正确吗？
 
-4. **Cost model — What does it cost?**
-   - CPU, memory, locks, cache coherence, syscalls, context switches, I/O, network, copies, write amplification, background work.
-   - Separate common-path cost from rare-path cost.
+## 复杂度作为设计成本
 
-5. **Failure model — Is it still correct after failure?**
-   - Crash, partial write, retry, timeout, network partition, concurrent interleaving, restart, recovery.
+把一切使系统更难理解或修改的因素视为复杂度：
 
-Short form:
+- **变更放大** —— 局部变更需要触及许多位置；
+- **认知负担** —— 调用方必须理解过多规则；
+- **未知的未知** —— 隐藏依赖 / 不变量使安全变更难以预测。
 
-> What is it? Who owns what? How does data move? What does it cost? Is it still correct after failure?
+## 深模块
 
-## Complexity as the design cost
+优先选择接口明显简单于其所隐藏复杂度的模块。思考：调用方可以放心不了解什么？实现能否发生实质变化而不要求调用方变化？正确使用是否要求调用方理解内部排序或表示方式？
 
-Treat complexity as anything that makes a system harder to understand or change:
-- **change amplification** — a local change touches many places;
-- **cognitive load** — a caller must understand too many rules;
-- **unknown unknowns** — hidden dependencies/invariants make safe change unpredictable.
+不要用代码行数或函数大小衡量模块质量。
 
-## Deep modules
+## 信息隐藏
 
-Prefer modules whose interface is substantially simpler than the complexity they hide.
-Ask:
-- What can callers safely remain ignorant of?
-- Can the implementation change materially without callers changing?
-- Does correct use require understanding internal ordering or representation?
+隐藏**设计知识**，而不只是隐藏字段。例如：页面布局、写入方隔离规则、可见性 / 持久性规则、崩溃时的排序、重试语义、缓存策略、版本 / LSN 语义。
 
-Do not use line count or function size as a proxy for module quality.
+如果同一条规则在多个模块中被重复计算或执行，说明信息可能已经泄漏。
 
-## Information hiding
+## 向下承接复杂度
 
-Hide **design knowledge**, not merely fields.
-Examples:
-- page layout;
-- writer fencing rules;
-- visibility/durability rules;
-- crash ordering;
-- retry semantics;
-- cache policy;
-- version/LSN semantics.
+复杂度无法避免时，将它放入拥有相关知识的组件中。优先在语义操作内部完成校验，由所有者安全地派生状态，在内部协调崩溃时的排序，并由一个操作返回调用方实际需要的状态 / 结果。
 
-If the same rule is recomputed or enforced in several modules, suspect information leakage.
+## 按知识拆分，而不是按时间拆分
 
-## Pull complexity downward
+不要仅因 `prepare`、`recover`、`flush`、`cleanup` 发生在不同阶段，就把它们拆成不同模块。如果这些阶段共享权威和不变量，放在一起可能更能降低复杂度。
 
-When complexity is unavoidable, put it in the component that owns the relevant knowledge.
-Prefer:
-- validation inside the semantic operation;
-- safe derivation inside the owner instead of callers recomputing it;
-- internal coordination of crash ordering;
-- one operation returning the state/result the caller actually needs.
+## 设计两遍
 
-## Split by knowledge, not time
+对于重要边界，至少比较一个真正不同的替代方案。比较接口复杂度、所有权清晰度、泄漏的知识、变更放大、失败推理、常见路径成本，以及确实可能需要的可扩展性。
 
-Avoid temporal decomposition: splitting `prepare`, `recover`, `flush`, `cleanup` into modules solely because they occur at different phases.
-If those phases share authority and invariants, keeping them together may reduce complexity.
+不要仅因某个方案层次更多或抽象程度更高，就偏好它。
 
-## Design it twice
+## 警示信号
 
-For important boundaries, compare at least one genuinely different alternative.
-Compare:
-- interface complexity;
-- ownership clarity;
-- leaked knowledge;
-- change amplification;
-- failure reasoning;
-- common-path cost;
-- extensibility that is actually likely to matter.
+把这些视为信号，而不是自动判定的违规项：
 
-Do not prefer an option merely because it has more layers or is more abstract.
+- 浅模块
+- 透传方法
+- 信息泄漏
+- 时间分解
+- 绑定方法
+- 特殊 / 通用混杂
+- 难以命名
+- 难以描述
+- 非直观代码
 
-## Red flags
-
-Use these as signals, not automatic violations:
-- Shallow Module
-- Pass-Through Method
-- Information Leakage
-- Temporal Decomposition
-- Conjoined Methods
-- Special/General Mixture
-- Hard to Name
-- Hard to Describe
-- Nonobvious Code
-
-The useful question is always: **what complexity does this structure create or hide?**
+始终要问：**这种结构创建或隐藏了什么复杂度？**

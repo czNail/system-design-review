@@ -1,47 +1,47 @@
-# Failure Reasoning
+# 失败推理
 
-Read this before making correctness claims about persistent or distributed state.
+在对持久化或分布式状态作出正确性判断前，阅读本资料。
 
-## Establish the contract
+## 建立契约
 
-Define visibility (to whom), commitment, durability (against which failures), and what a successful response promises. Treat these as distinct properties; establish their required relationships from the system's contract. If the contract is unclear, state the assumption and keep conclusions conditional.
+定义可见性（对谁可见）、提交、持久性（抵御哪些失败）以及成功响应承诺的内容。把这些视为不同属性，并根据系统契约确定它们之间必须满足的关系。契约不清晰时，说明假设，并让结论保持条件性。
 
-## Transition reasoning order
+## 状态转换的推理顺序
 
-For one state transition, identify:
+针对一次状态转换，识别：
 
-1. Preconditions and authority.
-2. In-memory mutation.
-3. Data persistence.
-4. Metadata/control persistence.
-5. Publication/visibility to other actors.
-6. Crash between each boundary.
-7. Duplicate/retry behavior.
-8. Restart and re-establishment of authority.
+1. 前置条件和权威；
+2. 内存中的变更；
+3. 数据持久化；
+4. 元数据 / 控制信息持久化；
+5. 向其他参与者发布 / 使其可见；
+6. 每个边界之间发生崩溃时的情况；
+7. 重复请求 / 重试行为；
+8. 重启和权威的重新建立。
 
-Do not describe only the happy-path recovery procedure. Verify the invariant at each boundary.
+不要只描述顺利路径上的恢复流程。要在每个边界检查不变量。
 
-## Common invariants
+## 常见不变量
 
-Select only patterns required by the established contract:
-- persisted metadata must not claim a state stronger than durable data;
-- if visibility promises committed state, consumer-visible state must not exceed the committed boundary;
-- if visibility or a successful response promises durability, the exposed or acknowledged state must satisfy that durability boundary;
-- stale authority cannot continue mutating state after a newer authority is established;
-- retries are idempotent or conflicts are detected explicitly;
-- recovery establishes one unambiguous history before normal mutation resumes.
+只选择已确立契约要求的模式：
 
-## Failure matrix shortcut
+- 已持久化的元数据不能声称状态强于实际持久化的数据；
+- 如果可见性承诺已提交状态，消费者可见状态不能超过已提交边界；
+- 如果可见性或成功响应承诺持久性，已暴露或确认的状态必须满足该持久性边界；
+- 建立更新的权威后，过期权威不能继续修改状态；
+- 重试必须具备幂等性，或明确检测并报告冲突；
+- 恢复必须先建立一段明确且无歧义的历史，再恢复正常变更。
 
-For each critical operation, consider only material cut points:
+## 失败矩阵快捷方式
 
-| Cut point | What is durable? | What is visible? | Safe retry? | Recovery source of truth? |
+对每个关键操作，只考虑有实质影响的切点：
+
+| 切点 | 哪些内容已持久化？ | 哪些内容已可见？ | 是否可以安全重试？ | 恢复时的事实来源？ |
 |---|---|---|---|---|
-| before mutation | | | | |
-| after data write / before sync | | | | |
-| after data durable / before metadata | | | | |
-| after metadata / before response | | | | |
-| after response / before next operation | | | | |
+| 变更之前 | | | | |
+| 数据写入之后 / 同步之前 | | | | |
+| 数据持久化之后 / 元数据之前 | | | | |
+| 元数据之后 / 响应之前 | | | | |
+| 响应之后 / 下一次操作之前 | | | | |
 
-Only expand the matrix when the current design decision depends on it.
-Adapt the cut points to the actual operation ordering and include commitment and response guarantees where relevant; the rows are prompts, not a prescribed persistence protocol.
+只有当当前设计决策依赖更细的分析时，才扩展矩阵。根据实际操作顺序调整切点，并在相关时加入提交和响应保证；这些行是提示，不是规定的持久化协议。
